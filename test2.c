@@ -1,9 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
-
+#include <time.h>
 long g_count = 0;
-
+struct timeval start, end;
+pthread_mutex_t g_mutex = PTHREAD_MUTEX_INITIALIZER;
 void *thread_func(void *arg)
 {
 	long i, j, k, count = (long)arg;
@@ -23,17 +24,21 @@ void *thread_func(void *arg)
 		/*
 		 * The purpose of this code is to occupy cpu for long time.
 		 */
+		pthread_mutex_lock(&g_mutex);
 		for (j = 0; j<100000; j++)
 			for (k = 0; k<3000; k++)
 				l += j * k;
 
 		g_count++;
+		pthread_mutex_unlock(&g_mutex);
+
 		/**************************************************************/
 	}
 }
 
 int main(int argc, char *argv[])
 {
+	gettimeofday(&start, NULL);
 	pthread_t *tid;
 	long i, thread_count, value;
 	int rc;
@@ -102,4 +107,9 @@ int main(int argc, char *argv[])
 	printf("value: %ld\n", g_count);
 
 	free(tid);
+		gettimeofday(&end,NULL);
+
+  printf("Time in microseconds: %ld microseconds\n",
+            ((end.tv_sec - start.tv_sec)*1000000L
+           +end.tv_usec) - start.tv_usec);
 }
