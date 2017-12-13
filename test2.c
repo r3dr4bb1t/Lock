@@ -4,7 +4,9 @@
 #include <time.h>
 long g_count = 0;
 struct timeval start, end;
-pthread_mutex_t g_mutex = PTHREAD_MUTEX_INITIALIZER;
+static pthread_spinlock_t g_mutex;
+int pshared;
+
 void *thread_func(void *arg)
 {
 	long i, j, k, count = (long)arg;
@@ -24,13 +26,13 @@ void *thread_func(void *arg)
 		/*
 		 * The purpose of this code is to occupy cpu for long time.
 		 */
-		pthread_mutex_lock(&g_mutex);
+		pthread_spin_lock(&g_mutex);
 		for (j = 0; j<100000; j++)
 			for (k = 0; k<3000; k++)
 				l += j * k;
 
 		g_count++;
-		pthread_mutex_unlock(&g_mutex);
+		pthread_spin_unlock(&g_mutex);
 
 		/**************************************************************/
 	}
@@ -39,6 +41,9 @@ void *thread_func(void *arg)
 int main(int argc, char *argv[])
 {
 	gettimeofday(&start, NULL);
+	
+pthread_spin_init(&g_mutex,pshared);
+
 	pthread_t *tid;
 	long i, thread_count, value;
 	int rc;

@@ -4,7 +4,9 @@
 #include <pthread.h>
 
 long g_count = 0;
-pthread_mutex_t g_mutex = PTHREAD_MUTEX_INITIALIZER;
+int pshared;
+
+static pthread_spinlock_t g_mutex;
 struct timeval start, end;
 
 void *thread_func(void *arg)
@@ -19,15 +21,16 @@ void *thread_func(void *arg)
 	 * because g_count is shared by other threads.
 	 */
 	for (i = 0; i<count; i++) {
-		pthread_mutex_lock(&g_mutex);
+		pthread_spin_lock(&g_mutex);
 		g_count++;
-		pthread_mutex_unlock(&g_mutex);
+		pthread_spin_unlock(&g_mutex);
 		/******************************************/
 	}
 }
 
 int main(int argc, char *argv[])
 {
+pthread_spin_init(&g_mutex,pshared);
 	gettimeofday(&start, NULL);
 	pthread_t *tid;
 	long i, thread_count, value;
