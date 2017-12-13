@@ -1,4 +1,4 @@
-#include "hybrid.h"
+#include "hybrid_lock.h"
 
 void hybrid_lock_init(hybrid_lock_t * lock)
 {
@@ -61,3 +61,4 @@ void hybrid_lock_unlock(hybrid_lock_t * lock)
    pthread_mutex_unlock(&(lock->_m));
    pthread_spin_unlock(&(lock->_s));
 }
+int main () {return 0;}

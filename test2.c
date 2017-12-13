@@ -4,7 +4,7 @@
 #include <time.h>
 long g_count = 0;
 struct timeval start, end;
-static pthread_spinlock_t g_mutex;
+hybrid
 int pshared;
 
 void *thread_func(void *arg)
