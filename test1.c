@@ -1,8 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 #include <pthread.h>
 
 long g_count = 0;
+pthread_mutex_t g_mutex = PTHREAD_MUTEX_INITIALIZER;
+struct timeval start, end;
 
 void *thread_func(void *arg)
 {
@@ -16,14 +19,16 @@ void *thread_func(void *arg)
 	 * because g_count is shared by other threads.
 	 */
 	for (i = 0; i<count; i++) {
-		/************ Critical Section ************/
+		pthread_mutex_lock(&g_mutex);
 		g_count++;
+		pthread_mutex_unlock(&g_mutex);
 		/******************************************/
 	}
 }
 
 int main(int argc, char *argv[])
 {
+	gettimeofday(&start, NULL);
 	pthread_t *tid;
 	long i, thread_count, value;
 	int rc;
@@ -92,4 +97,10 @@ int main(int argc, char *argv[])
 	printf("value: %ld\n", g_count);
 
 	free(tid);
+	gettimeofday(&end,NULL);
+
+  printf("Time in microseconds: %ld microseconds\n",
+            ((end.tv_sec - start.tv_sec)*1000000L
+           +end.tv_usec) - start.tv_usec);
+
 }
